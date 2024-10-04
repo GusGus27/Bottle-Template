@@ -1,31 +1,28 @@
-#Bottle Template created by @rediar 
-#bottle is good for small scale web applications. It is easy to quickly make API's or small personal webpage using Bottle.
-import bottle
+from bottle import route, run, template, static_file
+from configs.database import Database
 
-#this is the main page
-@bottle.route('/') 
-def index():
-  return 'You can write html here' #html tutorial is here: https://www.w3schools.com/html/ 
 
-@bottle.route('/static_page') #no .html extension to the end of the url is needed
-def static_page():
-  return bottle.static_file('page.html',root="static") #displays page.html in folder static
+@route('/<filename>')
+def server_static(filename):
+    return static_file(filename, root='./static')
 
-@bottle.route('/input/<name>') #bottle can also get variables
-def input(name):
-  return 'Hello '+name #try it! go to /input/yourname
-#Advanced Note: regex and integer filters can also be used with bottle. 
 
-#this can only be accesed with a post request (visiting in browser will return 405 Method Not Allowed error)
-@bottle.post('/post_request_only')
-def post_request_only():
-  return 'Post request succesful'
+@route('/')
+def home():
+    db = Database()
+    rs = db.fetchall(f"SELECT * FROM pokemons;")
+    #if rs is not None:
+    #for row in rs:
+    #print(str(row['id']) + ' ' + row['name'])
+    nombre2 = 'pp'
+    edad = 16
+    return template('index', nombre=nombre2, edad=edad, pokemones=rs)
 
-#A 404 page if the url doesn't exist
-@bottle.error(404)
-def error404(error):
-  return("oops! the page you were looked for isn't here. <a href='/'>Return Home?</a>")
 
-bottle.run(host='0.0.0.0', port=1234) #this starts the webpage. any code after this line won't be run
+@route('/contacto')
+def contacto():
+    return template('contacto')
 
-#Good luck programming!
+
+if __name__ == '__main__':
+    run(host='localhost', port=8080, reloader=True)
